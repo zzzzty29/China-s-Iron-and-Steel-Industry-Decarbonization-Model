@@ -5,6 +5,7 @@ import seaborn as sns
 
 # Read sensitivity analysis results
 df = pd.read_excel('outputs/output_sensitivity.xlsx')
+plt.rcParams['svg.fonttype'] = 'none'
 
 # Convert units
 # Production: divide by 1000 (million ton)
@@ -13,19 +14,19 @@ ccs_cols = ['CCS_2030', 'CCS_2040', 'CCS_2050', 'CCS_2060']
 for col in h2_cols + ccs_cols:
     df[col] = df[col] / 1000
 
-# Emissions: divide by 1e6 (million ton)
+# Emissions: divide by 1e6 (billion ton)
 emission_cols = ['Emission_2030', 'Emission_2040', 'Emission_2050', 'Emission_2060']
 for col in emission_cols:
     df[col] = df[col] / 1e6
 
-# Cost: divide by 1e9 (billion CNY)
+# Cost: divide by 1e9 (trillion CNY)
 cost_cols = ['Cost_2030', 'Cost_2040', 'Cost_2050', 'Cost_2060']
 for col in cost_cols:
     df[col] = df[col] / 1e9
 
 # Set up the plot with better spacing
-fig, axes = plt.subplots(2, 3, figsize=(16, 10))
-plt.subplots_adjust(hspace=0.35, wspace=0.3, top=0.94, bottom=0.1, left=0.08, right=0.96)
+fig, axes = plt.subplots(2, 3, figsize=(16, 14))
+plt.subplots_adjust(hspace=0.2, wspace=0.2, top=0.94, bottom=0.1, left=0.08, right=0.96)
 
 # Define colors for different categories
 carbon_colors = {'reference': '#1f77b4', 'moderate': '#ff7f0e', 'strict': '#2ca02c'}
@@ -44,7 +45,7 @@ years = [2030, 2040, 2050, 2060]
 # 2030 - all scenarios
 ccs_2030_all = df['CCS_2030'].values
 bp1 = ax.boxplot([ccs_2030_all], positions=[0], widths=0.6, patch_artist=True,
-                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
 bp1['boxes'][0].set_facecolor('lightgray')
 
 # Collect legend handles and labels
@@ -69,7 +70,7 @@ for i, year in enumerate([2040, 2050, 2060]):
     x_positions.append(center_pos)
     
     bp = ax.boxplot(box_data, positions=positions, widths=0.6, patch_artist=True,
-                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
     for j, (patch, color) in enumerate(zip(bp['boxes'], colors)):
         patch.set_facecolor(color)
         if i == 0:  # Only add to legend once
@@ -77,17 +78,17 @@ for i, year in enumerate([2040, 2050, 2060]):
             labels_a.append(scenarios[j].capitalize())
 
 ax.set_xticks([0] + x_positions)
-ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'])
-ax.set_ylabel('BF-BOF-CCS Production\n(million t-steel)')
-ax.legend(handles_a, labels_a, loc='upper left', frameon=False)
-ax.text(-2, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "a.", fontsize=14, fontweight='bold')
+ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'], fontsize=14)
+ax.tick_params(axis='y', labelsize=14)
+ax.legend(handles_a, labels_a, loc='upper left', frameon=False, fontsize=15)
+ax.text(4.5, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "a. BF-BOF-CCS Production\n(million t-steel)", fontsize=18, fontweight='bold', ha='center')
 
 # Plot b: Phaseout factor vs CCS production
 ax = axes[1, 0]
 
 # 2030 - all scenarios
 bp1 = ax.boxplot([ccs_2030_all], positions=[0], widths=0.6, patch_artist=True,
-                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
 bp1['boxes'][0].set_facecolor('lightgray')
 
 handles_b = [bp1['boxes'][0]]
@@ -112,7 +113,7 @@ for i, year in enumerate([2040, 2050, 2060]):
     x_positions.append(center_pos)
     
     bp = ax.boxplot(box_data, positions=positions, widths=0.6, patch_artist=True,
-                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
     for j, (patch, color) in enumerate(zip(bp['boxes'], colors)):
         patch.set_facecolor(color)
         if i == 0:  # Only add to legend once
@@ -120,10 +121,10 @@ for i, year in enumerate([2040, 2050, 2060]):
             labels_b.append(f'PF={phaseout_values[j]}')
 
 ax.set_xticks([0] + x_positions)
-ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'])
-ax.set_ylabel('BF-BOF-CCS Production\n(million t-steel)')
-ax.legend(handles_b, labels_b, loc='upper left', frameon=False)
-ax.text(-2, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "b.", fontsize=14, fontweight='bold')
+ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'], fontsize=14)
+ax.tick_params(axis='y', labelsize=14)
+ax.legend(handles_b, labels_b, loc='upper left', frameon=False, fontsize=15)
+ax.text(6.5, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "b. BF-BOF-CCS Production\n(million t-steel)", fontsize=18, fontweight='bold', ha='center')
 
 # Plot c: Carbon scenario vs H2 production
 ax = axes[0, 1]
@@ -131,7 +132,7 @@ ax = axes[0, 1]
 # 2030 - all scenarios
 h2_2030_all = df['H2_2030'].values
 bp1 = ax.boxplot([h2_2030_all], positions=[0], widths=0.6, patch_artist=True,
-                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
 bp1['boxes'][0].set_facecolor('lightgray')
 
 handles_c = [bp1['boxes'][0]]
@@ -154,7 +155,7 @@ for i, year in enumerate([2040, 2050, 2060]):
     x_positions.append(center_pos)
     
     bp = ax.boxplot(box_data, positions=positions, widths=0.6, patch_artist=True,
-                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
     for j, (patch, color) in enumerate(zip(bp['boxes'], colors)):
         patch.set_facecolor(color)
         if i == 0:
@@ -162,17 +163,17 @@ for i, year in enumerate([2040, 2050, 2060]):
             labels_c.append(scenarios[j].capitalize())
 
 ax.set_xticks([0] + x_positions)
-ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'])
-ax.set_ylabel('H2-DRI-EAF Production\n(million t-steel)')
-ax.legend(handles_c, labels_c, loc='upper left', frameon=False)
-ax.text(-2, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "c.", fontsize=14, fontweight='bold')
+ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'], fontsize=14)
+ax.tick_params(axis='y', labelsize=14)
+ax.legend(handles_c, labels_c, loc='upper left', frameon=False, fontsize=15)
+ax.text(4.5, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "c. H2-DRI-EAF Production\n(million t-steel)", fontsize=18, fontweight='bold', ha='center')
 
 # Plot d: Phaseout factor vs H2 production
 ax = axes[1, 1]
 
 # 2030 - all scenarios
 bp1 = ax.boxplot([h2_2030_all], positions=[0], widths=0.6, patch_artist=True,
-                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
 bp1['boxes'][0].set_facecolor('lightgray')
 
 handles_d = [bp1['boxes'][0]]
@@ -195,7 +196,7 @@ for i, year in enumerate([2040, 2050, 2060]):
     x_positions.append(center_pos)
     
     bp = ax.boxplot(box_data, positions=positions, widths=0.6, patch_artist=True,
-                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
     for j, (patch, color) in enumerate(zip(bp['boxes'], colors)):
         patch.set_facecolor(color)
         if i == 0:
@@ -203,10 +204,11 @@ for i, year in enumerate([2040, 2050, 2060]):
             labels_d.append(f'PF={phaseout_values[j]}')
 
 ax.set_xticks([0] + x_positions)
-ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'])
-ax.set_ylabel('H2-DRI-EAF Production\n(million t-steel)')
-ax.legend(handles_d, labels_d, loc='upper left', frameon=False)
-ax.text(-2, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "d.", fontsize=14, fontweight='bold')
+ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'], fontsize=14)
+ax.tick_params(axis='y', labelsize=14)
+ax.legend(handles_d, labels_d, loc='upper left', frameon=False, fontsize=15)
+ax.text(6.5, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "d. H2-DRI-EAF Production\n(million t-steel)", fontsize=18, fontweight='bold', ha='center')
+
 
 # Plot e: Phaseout factor vs Carbon emissions
 ax = axes[0, 2]
@@ -214,7 +216,7 @@ ax = axes[0, 2]
 # 2030 - all scenarios
 emission_2030_all = df['Emission_2030'].values
 bp1 = ax.boxplot([emission_2030_all], positions=[0], widths=0.6, patch_artist=True,
-                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
 bp1['boxes'][0].set_facecolor('lightgray')
 
 handles_e = [bp1['boxes'][0]]
@@ -237,7 +239,7 @@ for i, year in enumerate([2040, 2050, 2060]):
     x_positions.append(center_pos)
     
     bp = ax.boxplot(box_data, positions=positions, widths=0.6, patch_artist=True,
-                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
     for j, (patch, color) in enumerate(zip(bp['boxes'], colors)):
         patch.set_facecolor(color)
         if i == 0:
@@ -245,11 +247,11 @@ for i, year in enumerate([2040, 2050, 2060]):
             labels_e.append(f'PF={phaseout_values[j]}')
 
 ax.set_xticks([0] + x_positions)
-ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'])
-ax.set_ylabel('Carbon Emissions\n(million tCO2)')
+ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'], fontsize=14)
+ax.tick_params(axis='y', labelsize=14)
 ax.set_ylim(0, 1.5)
-ax.legend(handles_e, labels_e, loc='upper right', frameon=False)
-ax.text(-2, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "e.", fontsize=14, fontweight='bold')
+ax.legend(handles_e, labels_e, loc='upper right', frameon=False, fontsize=15)
+ax.text(6.5, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "e. Carbon Emissions\n(billion tCO2e)", fontsize=18, fontweight='bold', ha='center')
 
 # Plot f: Phaseout factor vs Production cost
 ax = axes[1, 2]
@@ -257,7 +259,7 @@ ax = axes[1, 2]
 # 2030 - all scenarios
 cost_2030_all = df['Cost_2030'].values
 bp1 = ax.boxplot([cost_2030_all], positions=[0], widths=0.6, patch_artist=True,
-                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                 boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
 bp1['boxes'][0].set_facecolor('lightgray')
 
 handles_f = [bp1['boxes'][0]]
@@ -280,7 +282,7 @@ for i, year in enumerate([2040, 2050, 2060]):
     x_positions.append(center_pos)
     
     bp = ax.boxplot(box_data, positions=positions, widths=0.6, patch_artist=True,
-                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops)
+                    boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, showfliers=False)
     for j, (patch, color) in enumerate(zip(bp['boxes'], colors)):
         patch.set_facecolor(color)
         if i == 0:
@@ -288,16 +290,12 @@ for i, year in enumerate([2040, 2050, 2060]):
             labels_f.append(f'PF={phaseout_values[j]}')
 
 ax.set_xticks([0] + x_positions)
-ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'])
-ax.set_ylabel('Production Cost\n(billion CNY)')
+ax.set_xticklabels(['2030\n(All scenarios)', '2040', '2050', '2060'], fontsize=14)
+ax.tick_params(axis='y', labelsize=14)
 ax.set_ylim(1, 4)
-ax.legend(handles_f, labels_f, loc='lower right', frameon=False)
-ax.text(-2, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "f.", fontsize=14, fontweight='bold')
+ax.legend(handles_f, labels_f, loc='lower right', frameon=False, fontsize=15)
+ax.text(6.5, ax.get_ylim()[1] + 0.02*(ax.get_ylim()[1] - ax.get_ylim()[0]), "f. Production Cost\n(trillion CNY)", fontsize=18, fontweight='bold', ha='center')
 
-# Add x-axis label for all subplots with closer positioning
-for i in range(2):
-    for j in range(3):
-        axes[i, j].set_xlabel('Year', labelpad=5)
 
 # Get median, 25th and 75th percentiles
 def get_stats(data):
@@ -321,22 +319,42 @@ for year, col in zip([2040, 2050, 2060], h2_cols[1:]):
         stats = get_stats(df[df['carbon_mode'] == scenario][col])
         print(f"{scenario}: {[f'{x:.2f}' for x in stats]} million t-steel")
 
+
+# CCS Production by phaseout factor
+print("\nCCS Production Statistics by Phaseout Factor (25th percentile, median, 75th percentile):")
+print("2030 (All scenarios):", [f"{x:.2f}" for x in get_stats(ccs_2030_all)], "million t-steel")
+for year, col in zip([2040, 2050, 2060], ccs_cols[1:]):
+    print(f"\n{year}:")
+    for pf in phaseout_values:
+        stats = get_stats(df[df['phaseout_factor'] == pf][col])
+        print(f"PF={pf}: {[f'{x:.2f}' for x in stats]} million t-steel")
+
+# H2 Production by phaseout factor
+print("\nH2 Production Statistics by Phaseout Factor (25th percentile, median, 75th percentile):")
+print("2030 (All scenarios):", [f"{x:.2f}" for x in get_stats(h2_2030_all)], "million t-steel")
+for year, col in zip([2040, 2050, 2060], h2_cols[1:]):
+    print(f"\n{year}:")
+    for pf in phaseout_values:
+        stats = get_stats(df[df['phaseout_factor'] == pf][col])
+        print(f"PF={pf}: {[f'{x:.2f}' for x in stats]} million t-steel")
+
 # Emissions and Cost by phaseout factor
 print("\nEmissions Statistics (25th percentile, median, 75th percentile):")
-print("2030 (All scenarios):", [f"{x:.2f}" for x in get_stats(emission_2030_all)], "million tCO2")
+print("2030 (All scenarios):", [f"{x:.2f}" for x in get_stats(emission_2030_all)], "billion tCO2")
 for year, col in zip([2040, 2050, 2060], emission_cols[1:]):
     print(f"\n{year}:")
     for pf in phaseout_values:
         stats = get_stats(df[df['phaseout_factor'] == pf][col])
-        print(f"PF={pf}: {[f'{x:.2f}' for x in stats]} million tCO2")
+        print(f"PF={pf}: {[f'{x:.3f}' for x in stats]} billion tCO2")
 
 print("\nCost Statistics (25th percentile, median, 75th percentile):")
-print("2030 (All scenarios):", [f"{x:.2f}" for x in get_stats(cost_2030_all)], "billion CNY")
+print("2030 (All scenarios):", [f"{x:.2f}" for x in get_stats(cost_2030_all)], "trillion CNY")
 for year, col in zip([2040, 2050, 2060], cost_cols[1:]):
     print(f"\n{year}:")
     for pf in phaseout_values:
         stats = get_stats(df[df['phaseout_factor'] == pf][col])
-        print(f"PF={pf}: {[f'{x:.2f}' for x in stats]} billion CNY")
+        print(f"PF={pf}: {[f'{x:.2f}' for x in stats]} trillion CNY")
 
-plt.savefig('figs/Fig6', dpi=600, bbox_inches='tight')
+plt.savefig('figs/Fig6.svg', dpi=600, bbox_inches='tight', transparent=True)
+plt.savefig('figs/Fig6.png', dpi=600, bbox_inches='tight')
 #plt.show()

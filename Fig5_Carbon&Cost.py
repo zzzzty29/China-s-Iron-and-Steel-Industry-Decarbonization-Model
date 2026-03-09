@@ -15,8 +15,8 @@ years = np.arange(2025, 2061)
 
 # plot settings
 plt.rcParams['font.family'] = 'Arial'
-fig = plt.figure(figsize=(28, 12))
-grid = plt.GridSpec(18, 30, wspace=0.3, hspace=0.3, top=0.94, bottom=0.08)
+fig = plt.figure(figsize=(8, 12))
+grid = plt.GridSpec(18, 30, wspace=0.1, hspace=0.1, top=0.94, bottom=0.1)
 
 years_ticks = np.arange(25, 61, 5).tolist() * 3
 years_ticks = [f"'{year}" for year in years_ticks]
@@ -44,10 +44,9 @@ for j, carbon_mode in enumerate(carbon_modes):
                    bottom=(production_df['EAF'].iloc[::5] + production_df['BF'].iloc[::5] + production_df['H2'].iloc[::5])/1000)
     
     plt.ylim(0, 1000)
-    plt.text(17.5 + 50 * j, plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0])*0.12, 'Year', fontsize=12, ha='center')
-    plt.text(17.5 + 50 * j, plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0])*0.18, f"{carbon_mode}", fontsize=12, fontweight='bold', ha='center')
+    plt.text(17.5 + 50 * j, plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0])*0.12, f"{carbon_mode}", fontsize=12, fontweight='bold', ha='center')
 
-plt.ylabel('Production (Million tons)', fontsize=12)
+plt.ylabel('Production (Million t-steel)', fontsize=12)
 plt.xticks(years_positions, years_ticks, fontsize=10)
 plt.xlim(-10, 145)
 plt.text(-8, plt.ylim()[1]*1.02, "a.", fontsize=14, fontweight='bold')
@@ -73,11 +72,10 @@ for j, carbon_mode in enumerate(carbon_modes):
                    color=colors_tech[3], alpha=0.8, width=3, linewidth=0.5, edgecolor='k',
                    bottom=(cost_df['EAF'].iloc[::5] + cost_df['BF'].iloc[::5] + cost_df['H2'].iloc[::5])/1e9)
     
-    plt.ylim(0, 4)
-    plt.text(17.5 + 50 * j, plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0])*0.12, 'Year', fontsize=12, ha='center')
-    plt.text(17.5 + 50 * j, plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0])*0.18, f"{carbon_mode}", fontsize=12, fontweight='bold', ha='center')
+    plt.ylim(0, 3.5)
+    plt.text(17.5 + 50 * j, plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0])*0.12, f"{carbon_mode}", fontsize=12, fontweight='bold', ha='center')
 
-plt.ylabel('Total Production Cost (Billion CNY)', fontsize=12)
+plt.ylabel('Total Production Cost (Trillion CNY)', fontsize=12)
 plt.xticks(years_positions, years_ticks, fontsize=10)
 plt.xlim(-10, 145)
 plt.text(-8, plt.ylim()[1]*1.02, "b.", fontsize=14, fontweight='bold')
@@ -103,11 +101,11 @@ for j, carbon_mode in enumerate(carbon_modes):
                    color=colors_tech[3], alpha=0.8, width=3, linewidth=0.5, edgecolor='k',
                    bottom=(emission_df['EAF'].iloc[::5] + emission_df['BF'].iloc[::5] + emission_df['H2'].iloc[::5])/1e6)
     
-    plt.ylim(0, 2)
-    plt.text(17.5 + 50 * j, plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0])*0.12, 'Year', fontsize=12, ha='center')
-    plt.text(17.5 + 50 * j, plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0])*0.18, f"{carbon_mode}", fontsize=12, fontweight='bold', ha='center')
+    plt.ylim(0, 1.8)
+    plt.yticks(np.arange(0, 1.9, 0.3))
+    plt.text(17.5 + 50 * j, plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0])*0.12, f"{carbon_mode}", fontsize=12, fontweight='bold', ha='center')
 
-plt.ylabel('Total Emission (Million tCO2)', fontsize=12)
+plt.ylabel('Total Emission (Billion tCO2e)', fontsize=12)
 plt.xticks(years_positions, years_ticks, fontsize=10)
 plt.xlim(-10, 145)
 plt.text(-8, plt.ylim()[1]*1.02, "c.", fontsize=14, fontweight='bold')
@@ -118,7 +116,8 @@ emission_labels = ['Scrap-EAF', 'BF-BOF', 'H2-DRI-EAF', 'BF-BOF-CCS']
 
 fig.legend(production_handles,
           production_labels,
-          loc='lower center', bbox_to_anchor=(0.5, 0.05), ncol=4, fontsize=11, frameon=False)
+          loc='lower center', bbox_to_anchor=(0.5, 0.08), ncol=4, fontsize=14, frameon=False)
 
 plt.savefig('figs/Fig5.png', dpi=600, bbox_inches='tight')
+plt.savefig('figs/Fig5.svg', dpi=600, bbox_inches='tight', transparent=True)
 #plt.show()

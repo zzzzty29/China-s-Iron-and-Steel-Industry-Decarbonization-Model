@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+# --- Data Acquisition ---
 data_para = pd.read_excel("data_DMA.xlsx", sheet_name="parameters")
 category = np.array(data_para['Category'])
 
@@ -9,66 +10,88 @@ data_output = pd.read_excel('outputs/output_DMA.xlsx', sheet_name="output", inde
 data_scrap = pd.read_excel('outputs/output_DMA.xlsx', sheet_name="scrap", index_col=0)
 data_stock = pd.read_excel('outputs/output_DMA.xlsx', sheet_name="stock", index_col=0)
 
-#plot
-plt.rcParams['font.family'] = 'Arial'
-color = ['darkorange', 'mediumpurple', 'saddlebrown', 'olive', 'forestgreen', 'khaki', 'pink', 'aqua',
-         'lightgreen', 'steelblue', 'firebrick', 'royalblue', 'chocolate', 'hotpink', 'bisque', 'darkgreen', 'grey']
-cmap = {}
-for i in range(len(category)):
-    cmap[category[i]] = color[i]
+# --- Global Plot Configuration ---
+plt.rcParams.update({
+    'font.family': 'Arial',
+    'font.size': 14,
+    'axes.labelsize': 18,
+    'xtick.labelsize': 16,
+    'ytick.labelsize': 16,
+    'svg.fonttype': 'none'
+})
 
-# production scrap stock unit 1e4
+colors = ['darkorange', 'mediumpurple', 'saddlebrown', 'olive', 'forestgreen', 'khaki', 'pink', 'aqua',
+          'lightgreen', 'steelblue', 'firebrick', 'royalblue', 'chocolate', 'hotpink', 'bisque', 'darkgreen', 'grey']
 
-plt.figure(figsize=(20, 6))
-grid = plt.GridSpec(25, 40, wspace=0.3, hspace=0.3, top=0.95, bottom=0.05)
-ax1 = plt.subplot(grid[:, 0:19])
-data_stock = data_stock.loc[2000:2060]
-bottom = np.zeros(len(data_stock.index))
-for i in range(len(category)):
-    plt.bar(data_stock.index, data_stock[category[i]]/1e5, color=cmap[category[i]], label=category[i], bottom=bottom, alpha=0.8, edgecolor='k')
-    bottom += np.array(data_stock[category[i]]/1e5)
-plt.xlim(1999, 2061)
-plt.xticks(np.arange(2000, 2061, 5))
-plt.ylim(0, 20)
-plt.yticks(np.arange(0, 20.01, 2))
-plt.xlabel('Year')
-plt.ylabel('Steel Stock (Gt)')
-plt.text(1997, 20*1.02, 'a.', weight='bold', fontsize=15)
-plt.text(1999, 20*1.02, 'In-use Stock', fontsize=12)
-plt.legend(loc='upper left', bbox_to_anchor=(0, 1), frameon=False, ncol=4, fontsize=10)
+# --- Layout Initialization ---
+fig = plt.figure(figsize=(20, 14)) 
+grid = plt.GridSpec(1, 2, wspace=0.1, left=0.08, right=0.96, top=0.75, bottom=0.3)
 
-ax1 = plt.subplot(grid[:, 21:40])
-data_scrap_plot = data_scrap.loc[2000:2060]
-bottom = np.zeros(len(data_scrap_plot.index))
-data_output_plot = data_output.loc[2000:2060]
-bar_handles = []
-for i in range(len(category)):
-    bar = plt.bar(data_scrap_plot.index, -data_scrap_plot[category[i]]/1e2, color=cmap[category[i]], label=category[i], bottom=bottom, alpha=0.8, edgecolor='k')
-    bottom -= np.array(data_scrap_plot[category[i]]/1e2)
-    bar_handles.append(bar)
-x = np.arange(2025, 2061)
-x1 = np.arange(2000, 2025)
-y1 = data_output.loc[2000:2024, 'production']/1e2
-y2 = data_output.loc[2024:2060, 'production']/1e2
-line1, = plt.plot(x1, y1, color='k', label='Statistical Data', linestyle='-', linewidth=2)
-line2, = plt.plot(np.arange(2024, 2061), y2, color='k', label='Prediction Data', linestyle='--', linewidth=2)
-plt.plot(np.arange(1999, 2062), np.zeros(63), color='k', linestyle='-', linewidth=1)
-#y1 = np.array(data_scrap.loc[2025:2060, 'sum']/1e3) * 9795.8 / data_scrap.loc[2020, 'sum']
-y1 = np.array(data_output.loc[2025:2060, 'EAF']/1e2)
-y2 = np.array(data_output.loc[2025:2060, 'production']/1e2) - y1
-stack = plt.stackplot(x, y1, y2, labels=['Scrap-EAF Route', 'Other Routes'], colors=['royalblue', 'grey'], alpha=0.8)
-line_stack_handles = [line1, line2] + stack
-line_stack_labels = ['Statistical Data', 'Prediction Data', 'Scrap-EAF Route', 'Other Routes']
-plt.xlim(1999, 2061)
-plt.xticks(np.arange(2000, 2061, 5))
-plt.ylim(-700, 1100)
-plt.yticks(np.arange(-700, 1110, 100), np.concatenate([np.arange(700, 0, -100), np.arange(0, 1110, 100)]))
-plt.xlabel('Year')
-plt.ylabel('Production Demand and Steel Scrap (Mt)')
-plt.text(1997, 1100+1200*0.03, 'b.', weight='bold', fontsize=15)
-plt.text(1999, 1100+1200*0.03, 'Steel Production and Scrap', fontsize=12)
-upper_legend = plt.legend(line_stack_handles, line_stack_labels, loc='upper left', bbox_to_anchor=(0, 1), frameon=False, fontsize=10, ncol=1)
-ax1.add_artist(upper_legend)
-lower_legend = plt.legend(bar_handles, category, loc='upper left', bbox_to_anchor=(0, 0.3), frameon=False, fontsize=10, ncol=1)
+# --- Panel a: In-use Stock (Reverted to Bar) ---
+ax1 = plt.subplot(grid[0, 0])
+df_stock = data_stock.loc[2000:2060]
+bottom_stock = np.zeros(len(df_stock))
+stock_handles = []
 
-plt.savefig('figs/Fig2.png', dpi=600)
+for i, cat in enumerate(category):
+    h = ax1.bar(df_stock.index, df_stock[cat]/1e5, color=colors[i], 
+                bottom=bottom_stock, alpha=0.8, edgecolor='k', linewidth=0.3)
+    bottom_stock += np.array(df_stock[cat]/1e5)
+    stock_handles.append(h)
+
+ax1.set_xlim(1999, 2061)
+ax1.set_xticks(np.arange(2000, 2061, 10))
+ax1.set_ylim(0, 17) 
+ax1.set_yticks(np.arange(0, 17, 2))
+ax1.set_title('a. In-use Steel Stock (Gt)', fontsize=22, pad=5, weight='bold')
+
+# --- Panel b: Steel Production and Scrap (Reverted to Bar) ---
+ax2 = plt.subplot(grid[0, 1])
+df_scrap = data_scrap.loc[2000:2060]
+bottom_scrap = np.zeros(len(df_scrap))
+
+# Scrap supply via bars (Negative)
+for i, cat in enumerate(category):
+    ax2.bar(df_scrap.index, -df_scrap[cat]/1e2, color=colors[i], 
+            bottom=bottom_scrap, alpha=0.8, edgecolor='k', linewidth=0.3)
+    bottom_scrap -= np.array(df_scrap[cat]/1e2)
+
+# Production Demand Lines
+x_hist = np.arange(2000, 2025)
+x_proj = np.arange(2024, 2061)
+y_hist = data_output.loc[2000:2024, 'production']/1e2
+y_proj = data_output.loc[2024:2060, 'production']/1e2
+
+line1, = ax2.plot(x_hist, y_hist, color='k', linestyle='-', linewidth=3)
+line2, = ax2.plot(x_proj, y_proj, color='k', linestyle='--', linewidth=3)
+ax2.axhline(0, color='k', linestyle='-', linewidth=1.5)
+
+# Production Route decomposition (Reverted to Bar)
+x_route = np.arange(2025, 2061)
+y_eaf = np.array(data_output.loc[2025:2060, 'EAF']/1e2)
+y_others = np.array(data_output.loc[2025:2060, 'production']/1e2) - y_eaf
+
+bar_eaf = ax2.bar(x_route, y_eaf, color='royalblue', alpha=0.8, edgecolor='k', linewidth=0.3)
+bar_others = ax2.bar(x_route, y_others, bottom=y_eaf, color='grey', alpha=0.8, edgecolor='k', linewidth=0.3)
+
+ax2.set_xlim(1999, 2061)
+ax2.set_xticks(np.arange(2000, 2061, 10))
+ax2.set_ylim(-700, 1100) 
+ax2.set_yticks(np.arange(-700, 1101, 100))
+ax2.set_yticklabels([str(abs(x)) for x in np.arange(-700, 1101, 100)])
+ax2.set_title('b. Steel Production and Scrap (Mt)', fontsize=22, pad=5, weight='bold')
+
+# --- Universal Bottom Legend ---
+# Row 1: Categories (Sectoral breakdown)
+leg1 = fig.legend(stock_handles, category, loc='lower center', 
+                  bbox_to_anchor=(0.5, 0.2), ncol=7, frameon=False, fontsize=20)
+
+# Row 2: Production info
+prod_handles = [line1, line2, bar_eaf, bar_others]
+prod_labels = ['Historical Production', 'Total Projected', 'Scrap-EAF Route', 'Other Routes']
+leg2 = fig.legend(prod_handles, prod_labels, loc='lower center', 
+                  bbox_to_anchor=(0.5, 0.15), ncol=4, frameon=False, fontsize=20)
+
+# --- Save Final Outputs ---
+plt.savefig('figs/Fig2.png', dpi=600, bbox_inches='tight')
+plt.savefig('figs/Fig2.svg', bbox_inches='tight')
